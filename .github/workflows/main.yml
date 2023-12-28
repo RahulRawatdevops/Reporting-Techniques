@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          server-id: 'github'
+          cache: 'maven'
+
+      - name: Configure Git user
+        run: |
+          git config user.email "release-bot@myalerts.org"
+          git config user.name "Release Bot"
+
+      - name: Release a new version
+        run: mvn -B release:prepare release:perform --file pom.xml --settings settings.xml
+        env:
+          GITHUB_USERNAME: ${{ secrets.DEPLOY_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
